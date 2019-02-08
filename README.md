@@ -15,11 +15,11 @@ Exemple:
 Requete POST `https://infinite-bruin-224415.appspot.com/api/run`
 Avec comme Body :
 - Exemple 1: une entité : `[{"id":1,"lat":4,"lon":2,"user":"user1","timestamp":3}]`
-- Exemple 2: trois entités : [
+- Exemple 2: trois entités : `[
 {"id":1,"lat":4,"lon":2,"user":"user1","timestamp":3},
 {"id":2,"lat":4,"lon":2,"user":"user2","timestamp":3},
 {"id":3,"lat":4,"lon":2,"user":"user3","timestamp":3}
-        ]
+        ]`
 2. Search records: Les utilisateurs peuvent accéder aux informations des courses en sélectionnant n'importe quelle combinaison (Id, Timestamp, Location).
 Exemple: 
 * Requete GET `https://infinite-bruin-224415.appspot.com/api/run?id=10`
