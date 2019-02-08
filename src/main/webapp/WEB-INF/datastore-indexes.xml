@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<datastore-indexes autoGenerate="true">
+
+	<datastore-index kind="record" ancestor="false">
+		<property name="id" direction="asc" />
+		<property name="lat" direction="asc" />
+		<property name="lon" direction="asc" />
+		<property name="user" direction="asc" />
+		<property name="timestamp" direction="asc" />
+	</datastore-index>
+	<datastore-index kind="record" ancestor="false">
+		<property name="lat" direction="asc" />
+		<property name="lon" direction="asc" />
+	</datastore-index>
+	<datastore-index kind="record" ancestor="false">
+		<property name="id" direction="asc" />
+		<property name="user" direction="asc" />
+		<property name="timestamp" direction="asc" />
+	</datastore-index>
+	<datastore-index kind="record" ancestor="false">
+		<property name="id" direction="asc" />
+		<property name="user" direction="asc" />
+	</datastore-index>
+
+	<datastore-index kind="record" ancestor="false">
+		<property name="id" direction="asc" />
+		<property name="timestamp" direction="asc" />
+	</datastore-index>
+	<datastore-index kind="record" ancestor="false">
+		<property name="user" direction="asc" />
+		<property name="timestamp" direction="asc" />
+	</datastore-index>
+
+
+
+</datastore-indexes>
+
+
