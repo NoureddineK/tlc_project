@@ -11,6 +11,7 @@ import org.restlet.resource.ServerResource;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /*
@@ -106,26 +107,34 @@ public class RunResource extends ServerResource {
             		propertyFilter =
                 	    PropertyFilter.eq("id", Integer.parseInt(parameter.getValue()));
             		break;
-            	case "lat":
+            	case "loc":
+            		String[] tab = parameter.getValue().split(",");
+            		if(tab.length != 2) throw new IllegalArgumentException("Argument location non valide");
             		propertyFilter = 
-            			PropertyFilter.eq("lat", Double.parseDouble(parameter.getValue()));
-            		break;
-            	case "lon": 
+            			PropertyFilter.eq("lat", Double.parseDouble(tab[0]));
+            		listFiler.add(propertyFilter);
             		propertyFilter=
-            			PropertyFilter.eq("lon", Double.parseDouble(parameter.getValue()));
+            			PropertyFilter.eq("lon", Double.parseDouble(tab[1]));
             		break;
             	case "user": 
             		propertyFilter=
             			PropertyFilter.eq("user", parameter.getValue());
             		break;
-            	case "timestamp": 
-            		String[] t = parameter.getValue().split(",");
-            		if (t.length != 2) throw new IllegalArgumentException("Argument timestamp non valide");
-            		propertyFilter =
-            			PropertyFilter.ge("timestamp", Long.parseLong(t[0]));
-            		listFiler.add(propertyFilter);
-            		propertyFilter =
-                			PropertyFilter.le("timestamp", Long.parseLong(t[1]));
+            	case "timestamp":
+            		if(parameter.getValue().contains(",")) {
+            			String[] t = parameter.getValue().split(",");
+                		if (t.length != 2) throw new IllegalArgumentException("Argument timestamp non valide");
+                		propertyFilter =
+                			PropertyFilter.ge("timestamp", Long.parseLong(t[0]));
+                		listFiler.add(propertyFilter);
+                		propertyFilter =
+                    			PropertyFilter.le("timestamp", Long.parseLong(t[1]));
+            		}
+            		else {
+            			propertyFilter =
+                    			PropertyFilter.eq("timestamp", Long.parseLong(parameter.getValue()));
+            		}
+            		
             		break;
             	default:
             		break;
@@ -141,6 +150,11 @@ public class RunResource extends ServerResource {
         	query = Query.newEntityQueryBuilder()
             	    .setKind("record")
             	    .setFilter(CompositeFilter.and(firstFilter, arrayFilter)).build();
+        	 results = datastore.run(query);
+        }else {
+        	query = Query.newEntityQueryBuilder()
+            	    .setKind("record")
+            	    .build();
         	 results = datastore.run(query);
         }
         List<Entity> listEntities = new ArrayList<>();
@@ -166,18 +180,9 @@ public class RunResource extends ServerResource {
          * https://cloud.google.com/datastore/docs/concepts/entities#deleting_an_entity
          * You might to do one or more query before to get some keys...
          */
-    	Form form = getRequest().getResourceRef().getQueryAsForm();
-    	Parameter paramListIDs = form.get(0);
-    	if(form.size() != 1 || !paramListIDs.getName().equals("list")) throw new IllegalArgumentException("Enter parameter \"list\" of IDs to delete separated with \",\"");
-    	String[] run_ids;
-    	if(paramListIDs.getValue().contains(",")) {
-    		run_ids = paramListIDs.getValue().split(","); 
-    	}
-    	else {
-    		List<String> ls = new ArrayList<>();
-    		ls.add(paramListIDs.getValue());
-    		run_ids = batch(String.class, ls);
-    	}
+    	
+    	String[] run_ids = getRequest().getAttributes().get("list").toString().split(",");
+        
         for (String r : run_ids) {
             System.out.println("To delete :"+r);
             Filter propertyFilter=
@@ -194,7 +199,22 @@ public class RunResource extends ServerResource {
             	listKeys.add(e.getKey());
             }
             Key [] keys_tab = batch(Key.class, listKeys);
-            datastore.delete(keys_tab);
+            //par defaut, on peut pas supprimer plus de 500 entites a la fois,
+            //donc, on splitte en petits tableau de max 500 et on envoie des requetes delete de max 500
+            if(keys_tab.length > 500) {
+            	
+				for (int i = 0; i < keys_tab.length - 500 + 1; i += 500) {
+					Key [] keys_tab_splitted = Arrays.copyOfRange(keys_tab, i, i + 500);
+					datastore.delete(keys_tab_splitted);
+				}
+            	if (keys_tab.length % 500 != 0) {
+            		Key [] keys_tab_splitted = Arrays.copyOfRange(keys_tab, keys_tab.length - keys_tab.length % 500, keys_tab.length);
+            		datastore.delete(keys_tab_splitted);
+            	}
+            }else {
+            	datastore.delete(keys_tab);
+            }
+            
         }
         
         
