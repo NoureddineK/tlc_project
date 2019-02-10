@@ -10,6 +10,7 @@ public class TrackingApplication extends Application {
 	public Restlet createInboundRoot() {
 		Router router = new Router(getContext());
 		router.attach("/api/run", RunResource.class);
+		router.attach("/api/run/{list}", RunResource.class);
 		return router;
 	}
 }
